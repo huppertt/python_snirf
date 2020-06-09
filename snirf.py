@@ -225,7 +225,7 @@ def getrequiredfieldsLst():
 def getoptionalfieldsLst():
      Optional=[]
      Optional.append("/nirs\d*/metaDataTags/\w*")
-     Optional.append("/nirs\d*/data\w*/measurementList\d*/ssourcePower")
+     Optional.append("/nirs\d*/data\w*/measurementList\d*/sourcePower")
      Optional.append("/nirs\d*/data\w*/measurementList\d*/detectorGain")
      Optional.append("/nirs\d*/data\w*/measurementList\d*/moduleIndex")
      Optional.append("/nirs\d*/data\d*/measurementList\d*/dataTypeLabel")
@@ -353,7 +353,13 @@ def validate(filename,fileOut=None):
                     print(Fore.RED +'\tINVALID dimensions')
                     foundInvalid=foundInvalid+1
                     lstInvalid.append(x)
-            
+            if ("stim" in x) and ("data" in x):
+                if int(val.size/len(val))>len(val):
+                    print(Fore.RED +'\tPossible transpose.  Should be <#trials x [onset, duration, amplitude, ...] >')
+                    foundInvalid=foundInvalid+1
+                    lstInvalid.append(x)
+
+
             if isrequired(x)==True:
                 print(Fore.BLUE + '\t\tRequired field')
             elif isoptional(x):
@@ -365,7 +371,7 @@ def validate(filename,fileOut=None):
         
          print('-' * 40)
          if(len(lstInvalid)!=0):
-              print(Fore.REF+ "File is INVALID")
+              print(Fore.RED+ "File is INVALID")
               print(Fore.RED +'\tINVALID ENTRIES FOUND')
               for x in lstInvalid:
                   print(Fore.RED + x)
