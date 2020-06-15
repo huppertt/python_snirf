@@ -354,7 +354,7 @@ def validate(filename,fileOut=None):
                     foundInvalid=foundInvalid+1
                     lstInvalid.append(x)
             if ("stim" in x) and ("data" in x):
-                if int(val.size/len(val))>len(val):
+                if(val.ndim != 2 or int(val.size/len(val)))!=3:
                     print(Fore.RED +'\tPossible transpose.  Should be <#trials x [onset, duration, amplitude, ...] >')
                     foundInvalid=foundInvalid+1
                     lstInvalid.append(x)
