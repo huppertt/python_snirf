@@ -291,7 +291,23 @@ def validate(filename,fileOut=None):
             for x in gID:
                 getallnames(gID[x],lst)
                 
+     def checkdim(field,fID,foundInvalid,lstInvalid):
+         val = fID.get(field);
     
+         if "Pos2D" in field:
+             dim = 2;
+         elif "Pos3D" in field:
+             dim = 2;
+         elif "dataTimeSeries"in field and "aux" in field:
+             dim = 1;
+         elif "dataTimeSeries" in field:
+             dim = 2;
+         elif  ("stim" in field)and ("data" in field):
+             dim = 2;
+         else:
+             dim = 1;
+         if dim != len(val.dims):
+             return False
     
      lst=[]  
     
@@ -338,26 +354,15 @@ def validate(filename,fileOut=None):
                 else:
                      print('\tHDF5-FLOAT 2D-Array: <{0}x{1}>'.format(len(val),int(val.size/len(val))))
                 
-            if "Pos2D" in x:
-                if(val.ndim != 2 or int(val.size/len(val)))!=2:
-                    print('\tINVALID dimensions')
-                    foundInvalid=foundInvalid+1
-                    lstInvalid.append(x)
-            if "Pos3D" in x:
-                if(val.ndim != 2 or int(val.size/len(val)))!=3:
-                    print(Fore.RED +'\tINVALID dimensions')
-                    foundInvalid=foundInvalid+1
-                    lstInvalid.append(x)
-            if "dataTimeSeries" in x:
-                if int(val.size/len(val))>len(val):
-                    print(Fore.RED +'\tINVALID dimensions')
-                    foundInvalid=foundInvalid+1
-                    lstInvalid.append(x)
-            if ("stim" in x) and ("data" in x):
-                if(val.ndim != 2 or int(val.size/len(val)))!=3:
-                    print(Fore.RED +'\tPossible transpose.  Should be <#trials x [onset, duration, amplitude, ...] >')
-                    foundInvalid=foundInvalid+1
-                    lstInvalid.append(x)
+            dimcheck = checkdim(x, fileID, foundInvalid, lstInvalid)
+            if dimcheck == False:
+                val = len(fileID.get(x).dims)
+                if val == 1:
+                    print(Fore.RED +'\tINVALID dimensions(Expected Number of Dimensions: 2)')
+                else:
+                    print(Fore.RED +'\tINVALID dimensions(Expected Number of Dimensions: 1)')
+                foundInvalid=foundInvalid+1;
+                lstInvalid.append(x)
 
 
             if isrequired(x)==True:
@@ -377,6 +382,7 @@ def validate(filename,fileOut=None):
                   print(Fore.RED + x)
          else:
               print(Fore.WHITE+ "File is VALID")
+         print(Style.RESET_ALL)
      else: # write to file
          text_file = open(fileOut, "w")
          text_file.write('\n' + '\n' + '-' * 40)
@@ -417,21 +423,15 @@ def validate(filename,fileOut=None):
                 else:
                      text_file.write('\n' + '\tHDF5-FLOAT 2D-Array: <{0}x{1}>'.format(len(val),int(val.size/len(val))))
                 
-            if "Pos2D" in x:
-                if(val.ndim != 2 or int(val.size/len(val)))!=2:
-                    text_file.write('\n' + '\tINVALID dimensions')
-                    foundInvalid=foundInvalid+1
-                    lstInvalid.append(x)
-            if "Pos3D" in x:
-                if(val.ndim != 2 or int(val.size/len(val)))!=3:
-                    text_file.write('\n' + '\tINVALID dimensions')
-                    foundInvalid=foundInvalid+1
-                    lstInvalid.append(x)
-            if "dataTimeSeries" in x:
-                if int(val.size/len(val))>len(val):
-                    text_file.write('\n' + '\tINVALID dimensions')
-                    foundInvalid=foundInvalid+1
-                    lstInvalid.append(x)
+            dimcheck = checkdim(x, fileID, foundInvalid, lstInvalid)
+            if dimcheck == False:
+                val = len(fileID.get(x).dims)
+                if val == 1:
+                    text_file.write(Fore.RED +'\tINVALID dimensions(Expected Number of Dimensions: 2)')
+                else:
+                    text_file.write(Fore.RED +'\tINVALID dimensions(Expected Number of Dimensions: 1)')
+                foundInvalid=foundInvalid+1
+                lstInvalid.append(x)
             
             if isrequired(x)==True:
                 text_file.write('\n' + '\t\tRequired field')
